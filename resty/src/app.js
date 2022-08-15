@@ -1,51 +1,62 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import './app.scss';
+import Header from './components/header/index';
+import Footer from './components/footer/index';
+import Form from './components/form/index';
+import Results from './components/results/index';
+import './app.css';
 
-// Let's talk about using index.js and some other name in the component folder
-// There's pros and cons for each way of doing this ...
-import Header from './components/header';
-import Footer from './components/footer';
-import Form from './components/form';
-import Results from './components/results';
-import Pic from './components/pic';
+function App() {
+  const [data, setData] = useState(null);
+  const [reqParams, setReqParams] = useState({});
+  const [bodyData, setBodyData] = useState({});
+  const [headers, setHeaders] = useState({});
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: null,
-      requestParams: {},
+  useEffect(() => {
+    if (data || reqParams || bodyData || headers) {
+      setReqParams(reqParams);
+      setBodyData(bodyData);
+      setHeaders(headers);
+      setData(data);
+    }
+    return () => {
+      setData(null);
+      setReqParams({});
+      setBodyData({});
+      setHeaders({});
     };
-  }
+  }, [data, reqParams, bodyData, headers]);
 
-  callApi = (requestParams) => {
-    // mock output
-    const data = {
-      count: 2,
-      results: [
-        { name: 'fake thing 1', url: 'http://fakethings.com/1' },
-        { name: 'fake thing 2', url: 'http://fakethings.com/2' },
-      ],
+  const callApi = async (reqParams, bodyParams) => {
+    const response = await fetch(reqParams.url);
+    const data = await response.json();
+    const record = 'Response: ' + JSON.stringify(data, null, 2);
+    setData(record);
+    setReqParams(reqParams);
+    const body = {
+      body: bodyParams.body,
     };
-    this.setState({ data, requestParams });
+    const headers = {
+      headers: reqParams.headers,
+    };
+    setBodyData(body);
+    setHeaders(headers);
   };
-
-  render() {
-    return (
-      <React.Fragment>
-        <Header />
-        <div>Request Method: {this.state.requestParams.method}</div>
-        <div>URL: {this.state.requestParams.url}</div>
-        <Form handleApiCall={this.callApi} />
-        <Results data={this.state.data} />
-
-        <Pic />
-
-        <Footer />
-      </React.Fragment>
-    );
-  }
+  return (
+    <>
+      <Header />
+      <div className='url'>URL: {reqParams.url}</div>
+      <div className='req'>Request Method: {reqParams.method}</div>
+      <Form handleApiCall={callApi} />
+      <Results
+        Response={data}
+        method={reqParams.method}
+        bodyData={bodyData}
+        headers={headers}
+      />
+      <Footer />
+    </>
+  );
 }
 
 export default App;

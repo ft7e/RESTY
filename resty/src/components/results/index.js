@@ -1,13 +1,28 @@
 import React from 'react';
 
-export default function Results(props) {
+function Results(props) {
+  let body = props.bodyData.body;
+  let headers = props.headers.headers;
   return (
-    <div>
-      <section>
-        <pre>
-          {props.data ? JSON.stringify(props.data, undefined, 2) : null}
+    <section data-testid='results'>
+      <div className='content'>
+        <pre className='header'>{props.method === 'GET' ? headers : null}</pre>
+        <pre className='body'>
+          {props.method === 'GET' ? (
+            props.Response
+          ) : props.method === 'POST' ? (
+            body
+          ) : props.method === 'PUT' ? (
+            body
+          ) : props.method === 'DELETE' ? (
+            'deleted successfully'
+          ) : (
+            <div className='loader'></div>
+          )}
         </pre>
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }
+
+export default Results;
